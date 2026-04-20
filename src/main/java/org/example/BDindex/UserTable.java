@@ -1,7 +1,9 @@
 package org.example.BDindex;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Реализовать in-memory таблицу пользователей с поддержкой индекса.
@@ -68,6 +70,7 @@ import java.util.List;
  */
 public class UserTable {
     List<User> users = new ArrayList<>();
+    Map<Long, User> idIndex = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -88,12 +91,17 @@ public class UserTable {
         long scanTime = System.nanoTime() - start;
 
         // index
-//            start = System.nanoTime();
-//            table.findByIdIndexed(targetId);
-//            long indexTime = System.nanoTime() - start;
+            start = System.nanoTime();
+            table.findByIdIndexed(targetId);
+            long indexTime = System.nanoTime() - start;
 
         System.out.println("Scan time:  " + scanTime);
-//            System.out.println("Index time: " + indexTime);
+        System.out.println("Index time: " + indexTime);
+        System.out.println("Разница в " + scanTime/indexTime);
+    }
+
+    private User findByIdIndexed(long targetId) {
+        return idIndex.get(targetId);
     }
 
 
@@ -108,5 +116,6 @@ public class UserTable {
 
     private void insert(User user) {
         users.add(user);
+        idIndex.put(user.getId(), user);
     }
 }

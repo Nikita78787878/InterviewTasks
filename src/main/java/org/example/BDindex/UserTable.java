@@ -7,10 +7,11 @@ public class UserTable {
     Map<Long, User> idIndex = new HashMap<>(); // Посмотреть с индексом
     Map<AgeNameKey, List<User>> ageNameIndex = new HashMap<>(); // Посмотреть с составным ключом
 
-    //Task2
+    //Task2 leftmost prefix rule
     Map<Integer, Map<String, List<User>>> ageNameMap = new HashMap<>();
 
-
+    //Task2 leftmost prefix rule
+    TreeMap<Integer, List<User>> treeMapIndex = new TreeMap<>();
 
     // Общая вставка для всех видов
     public void insert(User user) {
@@ -25,6 +26,8 @@ public class UserTable {
                 .computeIfAbsent(user.getAge(), k -> new HashMap<>())
                 .computeIfAbsent(user.getName(), k -> new ArrayList<>())
                 .add(user);
+
+        treeMapIndex.computeIfAbsent(user.getAge(), k->new ArrayList<>()).add(user);
     }
 
     // Прямой поиск
@@ -63,6 +66,7 @@ public class UserTable {
         return ageNameIndex.getOrDefault(key, Collections.emptyList());
     }
 
+    //Поиск по возрасту или по возрасту и имени
     public List<User> findByAgeAndNameLeftMost(int age, String name){
         List<User> found;
         if(name == null || name.isEmpty()){
@@ -74,5 +78,17 @@ public class UserTable {
         if(found == null) return Collections.emptyList();
 
         return new ArrayList<>(found);
+    }
+
+    //Поиск по диапазону возраста
+
+    /**
+     * Важно понимать: метод не создает новую независимую карту.
+     * Он возвращает представление, которое "смотрит" на часть исходной карты.
+     * Поэтому любые изменения (добавление, удаление, замена)
+     * в представлении немедленно отражаются в исходной карте, и наоборот
+     */
+    public List<User> findByAgeBetween(int from, int to){
+        return treeMapIndex.subMap(from, true, to, true).values().stream().flatMap(List::stream).toList();
     }
 }

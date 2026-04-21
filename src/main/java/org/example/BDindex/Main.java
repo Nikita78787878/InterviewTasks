@@ -51,6 +51,8 @@ public class Main {
         searchByAgeNameLeftMost(table, 20, null); // Поиск по возрасту без имени
         searchByAgeNameLeftMost(table, 20, "User1"); // Поиск по возрасту без имени
 
+        System.out.println("Кол-во юзеров с диапазоном возраста: " + table.findByAgeBetween(20, 22).size()); // диапазон выборки по возрасту
+
     }
 
     // Поиск по возрасту без имени
@@ -62,6 +64,5 @@ public class Main {
         }else{
             userFindByAgeNotName.forEach(System.out::println);
         }
-
     }
 }

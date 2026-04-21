@@ -124,56 +124,77 @@ public class UserTable {
             return users;
         }
 
-        // Поиск по ID
+        //  Поиск по ID
         if (query.id() != null) {
             User user = findByIdIndexed(query.id());
             return user != null ? List.of(user) : Collections.emptyList();
         }
 
-        List<User> result;
-
-        // 2. Точный возраст (с именем или без)
+        // Точный возраст (с именем или без)
         if (query.age() != null) {
-            result = findByAgeAndNameLeftMost(query.age(), query.name());
-            // Если есть ещё active – отфильтруем
-            if (query.active() != null && result != null) {
+            List<User> result = findByAgeAndNameLeftMost(query.age(), query.name());
+            if (result == null || result.isEmpty()) {
+                return Collections.emptyList();
+            }
+            if (query.active() != null) {
                 result = result.stream()
                         .filter(u -> u.isActive() == query.active())
                         .toList();
             }
-            return result != null ? result : Collections.emptyList();
+            return result;
         }
 
-        //  Диапазон возраста
+        // Диапазон возраста (с комбинированием active через bitmap)
         if (query.ageFrom() != null || query.ageTo() != null) {
-            result = findByAgeBetween(query.ageFrom(), query.ageTo());
-            // Дополнительная фильтрация по имени, если задано
+            List<User> ageRangeUsers;
+
+            // Получаем пользователей по range индексу (TreeMap)
+            if (query.ageFrom() != null && query.ageTo() != null) {
+                ageRangeUsers = findByAgeBetween(query.ageFrom(), query.ageTo());
+            } else if (query.ageFrom() != null) {
+                ageRangeUsers = treeMapIndex.tailMap(query.ageFrom(), true).values().stream()
+                        .flatMap(List::stream)
+                        .toList();
+            } else {
+                ageRangeUsers = treeMapIndex.headMap(query.ageTo(), true).values().stream()
+                        .flatMap(List::stream)
+                        .toList();
+            }
+
+            // Если задан active – используем bitmap индекс и пересекаем результаты
+            if (query.active() != null) {
+                List<User> activeUsers = findByActive(query.active()); // bitmap index
+                if (activeUsers.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                Set<User> activeSet = new HashSet<>(activeUsers);
+                ageRangeUsers = ageRangeUsers.stream()
+                        .filter(activeSet::contains)
+                        .toList();
+            }
+
+            // Дополнительная фильтрация по имени (если есть)
             if (query.name() != null && !query.name().isEmpty()) {
-                result = result.stream()
+                ageRangeUsers = ageRangeUsers.stream()
                         .filter(u -> query.name().equals(u.getName()))
                         .toList();
             }
-            if (query.active() != null && result != null) {
-                result = result.stream()
-                        .filter(u -> u.isActive() == query.active())
-                        .toList();
-            }
-            return result != null ? result : Collections.emptyList();
+
+            return ageRangeUsers;
         }
 
-        //  Только active
+        // Только active (без условий по возрасту)
         if (query.active() != null) {
             return findByActive(query.active());
         }
 
-        // Если задано только имя (без возраста) – нет индекса, полный скан
+        //  Только имя (нет индекса → полный скан)
         if (query.name() != null && !query.name().isEmpty()) {
             return users.stream()
                     .filter(u -> query.name().equals(u.getName()))
                     .toList();
         }
 
-        //  Нет условий – вернуть всех
         return users;
     }
 

@@ -1,5 +1,7 @@
 package org.example.BDindex;
 
+import org.example.BDindex.lesson.UserQuery;
+
 import java.util.*;
 
 public class UserTable {
@@ -12,6 +14,9 @@ public class UserTable {
 
     //Task2 leftmost prefix rule
     TreeMap<Integer, List<User>> treeMapIndex = new TreeMap<>();
+
+    // Bitmap Index
+    private final BitSet bitSet = new BitSet();
 
     // Общая вставка для всех видов
     public void insert(User user) {
@@ -28,6 +33,8 @@ public class UserTable {
                 .add(user);
 
         treeMapIndex.computeIfAbsent(user.getAge(), k->new ArrayList<>()).add(user);
+
+        bitSet.set(users.size() -1, user.isActive());
     }
 
     // Прямой поиск
@@ -91,4 +98,26 @@ public class UserTable {
     public List<User> findByAgeBetween(int from, int to){
         return treeMapIndex.subMap(from, true, to, true).values().stream().flatMap(List::stream).toList();
     }
+
+    List<User> findByActive(boolean active) {
+        List<User> result = new ArrayList<>();
+
+        if (active) {
+            int i = bitSet.nextSetBit(0);
+            while (i != -1) {
+                result.add(idIndex.get((long) i));   // ← каст к long
+                i = bitSet.nextSetBit(i + 1);
+            }
+        } else {
+            int i = bitSet.nextClearBit(0);
+            while (i != -1 && i < users.size()) {
+                result.add(idIndex.get((long) i));   // ← каст к long
+                i = bitSet.nextClearBit(i + 1);
+            }
+        }
+
+        return result;
+    }
+
+
 }

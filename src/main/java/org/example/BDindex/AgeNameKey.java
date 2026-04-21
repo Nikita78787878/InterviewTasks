@@ -16,7 +16,7 @@ public class AgeNameKey {
         if (this == obj) return true;
         if (!(obj instanceof AgeNameKey key)) return false;
 
-        return age == key.age && name.equals(key.name);
+        return age == key.age && Objects.equals(name, key.name);
     }
 
     @Override

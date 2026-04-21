@@ -1,0 +1,64 @@
+
+/**
+ * Реализовать in-memory таблицу пользователей с поддержкой индекса.
+ * <p>
+ * Часть 1. Таблица без индекса
+ * <p>
+ * Требования:
+ * - хранить пользователей в порядке вставки
+ * - реализовать метод:
+ * <p>
+ * User findByIdScan(Long id)
+ * <p>
+ * который ищет пользователя полным проходом по таблице
+ * <p>
+ * <p>
+ * Часть 2. Индекс
+ * <p>
+ * Добавить Hash Index:
+ * <p>
+ * Требования:
+ * - при добавлении пользователя обновлять индекс
+ * - реализовать метод:
+ * <p>
+ * User findByIdIndexed(Long id)
+ * <p>
+ * Часть 3.
+ * Составной индекс:
+ * - Реализовать поиск по составному индексу:
+ * <p>
+ * List<User> findByAgeAndName(int age, String name)
+ * <p>
+ * Часть 4. Сравнение (опционально)
+ * <p>
+ * - создать 1_000_000 пользователей
+ * - замерить время:
+ * - findByIdScan
+ * - findByIdIndexed
+ * <p>
+ * <p>
+ * public class User {
+ * <p>
+ * private final Long id;
+ * private final String name;
+ * private final int age;
+ * <p>
+ * public User(Long id, String name, int age) {
+ * this.id = id;
+ * this.name = name;
+ * this.age = age;
+ * }
+ * <p>
+ * public Long getId() {
+ * return id;
+ * }
+ * <p>
+ * public String getName() {
+ * return name;
+ * }
+ * <p>
+ * public int getAge() {
+ * return age;
+ * }
+ * }
+ */

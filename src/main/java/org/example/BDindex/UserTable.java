@@ -1,6 +1,6 @@
 package org.example.BDindex;
 
-import org.example.BDindex.lesson.UserQuery;
+import org.example.BDindex.UserQuery;
 
 import java.util.*;
 
@@ -119,5 +119,62 @@ public class UserTable {
         return result;
     }
 
+    public List<User> findUserQuery(UserQuery query) {
+        if (query == null) {
+            return users;
+        }
+
+        // Поиск по ID
+        if (query.id() != null) {
+            User user = findByIdIndexed(query.id());
+            return user != null ? List.of(user) : Collections.emptyList();
+        }
+
+        List<User> result;
+
+        // 2. Точный возраст (с именем или без)
+        if (query.age() != null) {
+            result = findByAgeAndNameLeftMost(query.age(), query.name());
+            // Если есть ещё active – отфильтруем
+            if (query.active() != null && result != null) {
+                result = result.stream()
+                        .filter(u -> u.isActive() == query.active())
+                        .toList();
+            }
+            return result != null ? result : Collections.emptyList();
+        }
+
+        //  Диапазон возраста
+        if (query.ageFrom() != null || query.ageTo() != null) {
+            result = findByAgeBetween(query.ageFrom(), query.ageTo());
+            // Дополнительная фильтрация по имени, если задано
+            if (query.name() != null && !query.name().isEmpty()) {
+                result = result.stream()
+                        .filter(u -> query.name().equals(u.getName()))
+                        .toList();
+            }
+            if (query.active() != null && result != null) {
+                result = result.stream()
+                        .filter(u -> u.isActive() == query.active())
+                        .toList();
+            }
+            return result != null ? result : Collections.emptyList();
+        }
+
+        //  Только active
+        if (query.active() != null) {
+            return findByActive(query.active());
+        }
+
+        // Если задано только имя (без возраста) – нет индекса, полный скан
+        if (query.name() != null && !query.name().isEmpty()) {
+            return users.stream()
+                    .filter(u -> query.name().equals(u.getName()))
+                    .toList();
+        }
+
+        //  Нет условий – вернуть всех
+        return users;
+    }
 
 }

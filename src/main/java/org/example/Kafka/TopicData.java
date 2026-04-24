@@ -8,7 +8,5 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class TopicData {
     final List<Message> messages = new ArrayList<>();
     final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    final Long nextOffset = new Long(0L);
-
-
+    final AtomicLong nextOffset = new AtomicLong(0);
 }

@@ -24,7 +24,7 @@ public class InMemoryBroker implements Broker {
 
         data.lock.writeLock().lock();
         try{
-            long offset = data.messages.size(); // избыток AtomicLong  и замедление, просто размер вызвать
+            long offset = data.messages.size();
             data.messages.add(new Message(offset, message));
         }finally {
             data.lock.writeLock().unlock();

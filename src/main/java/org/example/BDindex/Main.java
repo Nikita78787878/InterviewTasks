@@ -8,12 +8,13 @@ public class Main {
 
         int size = 1_000_000;
 
-        // наполняем
+//        // наполняем
 //        for (int i = 0; i < size; i++) {
 //            table.insert(new User((long) i, "User" + i, i % 100, false));
 //        }
 //
-        testFindByActive();
+////        testFindByActive();
+//
 //
 //        table.insert(new User(1_000_001L, "User1", 20, false));
 //        table.insert(new User(1_000_002L, "User2", 20, false));

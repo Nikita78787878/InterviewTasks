@@ -31,5 +31,5 @@ public interface Broker {
      * @param topic имя топика
      * @return список сообщений (может быть пустым, но не null)
      */
-    List<String> poll(String topic);
+    List<Message> poll(String topic, long fromOffset);
 }

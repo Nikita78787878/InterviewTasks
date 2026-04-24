@@ -12,10 +12,18 @@ public class Demo {
 
         producer.send("orders", "order-1");
         producer.send("orders", "order-2");
+        producer.send("orders", "order-3");
 
-        List<String> messages = consumer.poll("orders");
+        List<Message> messages0 = consumer.poll("orders");
+        List<Message> messages1 = consumer.poll("orders", 1L);
 
-        System.out.println(messages);
-        // ожидается: [order-1, order-2]
+        //Читаем с начала
+        System.out.println("Читаем с 0 оффсета: ");
+        messages0.forEach(m -> System.out.println(m.getPayload()));
+        System.out.println();
+
+        //Читаем конкретный
+        System.out.println("Читаем 1 оффсета");
+        messages1.forEach(m -> System.out.println(m.getPayload()));
     }
 }
